@@ -35,6 +35,10 @@ class PercheckerRoutesyncCommand extends Command
         $routes_name = [];
 
         foreach ($routes as $key => $route) {
+            if (empty($route['name'])) {
+                unset($routes[$key]);
+                continue;
+            }
             $routes_name[$key] = $route['name'];
         }
 
@@ -95,11 +99,7 @@ class PercheckerRoutesyncCommand extends Command
 
     protected function filterRoute(array $route)
     {
-        if ($route['name']) {
-            return $route;
-        }
-        return;
-
+        return $route;
     }
 
     protected function getDbRoutes()
