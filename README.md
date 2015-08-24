@@ -41,4 +41,21 @@ php artisan vendor:publish
 php artisan migrate
 ```
 
+Trait 在 app/User.php 添加
+```php=
+use Sixbyte\Perchecker\HasPermissionTrait;
+```
+
+```php=
+use ... HasPermissionTrait
+```
 配置完成
+
+
+
+## 使用
+
+注册所有路由
+```shell
+php artisan perchecker:routesync
+```

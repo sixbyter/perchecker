@@ -20,7 +20,7 @@ class PercheckerRoutesyncCommand extends Command
      *
      * @var string
      */
-    protected $description = 'sync routes to db~';
+    protected $description = 'sync routes to db';
 
     /**
      * Execute the console command.
@@ -32,25 +32,25 @@ class PercheckerRoutesyncCommand extends Command
         $routes    = $this->getRoutes();
         $db_routes = $this->getDbRoutes();
 
-        $routes_uri = [];
+        $routes_name = [];
 
         foreach ($routes as $key => $route) {
-            $routes_uri[$key] = $route['uri'];
+            $routes_name[$key] = $route['name'];
         }
 
-        $db_routes_uri = $db_routes->lists('uri')->toArray();
+        $db_routes_name = $db_routes->lists('name')->toArray();
 
         $routeModel = Perchecker::getRouteModel();
 
         // 同步 路由
         foreach ($routes as $route) {
-            if (in_array($route['uri'], $db_routes_uri)) {
+            if (in_array($route['name'], $db_routes_name)) {
                 $data = [
-                    'name'   => $route['name'],
+                    'uri'    => $route['uri'],
                     'status' => 'sync',
                 ];
-                $routeModel::where('uri', $route['uri'])->update($data);
-                $this->info($route['uri'] . '  update');
+                $routeModel::where('name', $route['name'])->update($data);
+                $this->info($route['name'] . '  update');
             } else {
                 $data = [
                     'name'   => $route['name'],
@@ -58,16 +58,16 @@ class PercheckerRoutesyncCommand extends Command
                     'uri'    => $route['uri'],
                 ];
                 $routeModel::insert($data);
-                $this->comment($route['uri'] . '  insert');
+                $this->comment($route['name'] . '  insert');
             }
         }
 
         // 检查没有同步的路由
         foreach ($db_routes as $db_route) {
-            if (!in_array($db_route['uri'], $routes_uri)) {
+            if (!in_array($db_route['name'], $routes_name)) {
                 $db_route->status = 'missing';
                 $db_route->save();
-                $this->question($db_route['uri'] . '  missing');
+                $this->question($db_route['name'] . '  missing');
             }
         }
 
@@ -95,7 +95,11 @@ class PercheckerRoutesyncCommand extends Command
 
     protected function filterRoute(array $route)
     {
-        return $route;
+        if ($route['name']) {
+            return $route;
+        }
+        return;
+
     }
 
     protected function getDbRoutes()
