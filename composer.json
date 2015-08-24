@@ -20,7 +20,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Sixbyte\\Perchecker\\": "sixbyte/perchecker/src/Perchecker"
+      "Sixbyte\\Perchecker\\": "src/Perchecker"
     }
   },
   "version": "0.0.1",
