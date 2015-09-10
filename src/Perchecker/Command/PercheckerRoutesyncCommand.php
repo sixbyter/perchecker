@@ -42,7 +42,7 @@ class PercheckerRoutesyncCommand extends Command
             $routes_name[$key] = $route['name'];
         }
 
-        $db_routes_name = $db_routes->lists('name')->toArray();
+        $db_routes_name = $db_routes->lists('name');
 
         $routeModel = Perchecker::getRouteModel();
 
