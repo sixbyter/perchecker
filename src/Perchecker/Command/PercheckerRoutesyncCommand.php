@@ -48,7 +48,7 @@ class PercheckerRoutesyncCommand extends Command
 
         // 同步 路由
         foreach ($routes as $route) {
-            if (in_array($route['name'], $db_routes_name)) {
+            if (in_array($route['name'], (array) $db_routes_name)) {
                 $data = [
                     'uri'    => $route['uri'],
                     'status' => 'sync',
