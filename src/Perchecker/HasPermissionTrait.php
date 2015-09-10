@@ -57,4 +57,22 @@ trait HasPermissionTrait
         }
     }
 
+    public function canRoute($r, $type = 'id')
+    {
+        if ($type === 'id' || $type === 'name') {
+            $routeModel = Perchecker::getRouteModel();
+            $route      = $routeModel->where('name', $rolename)->first();
+            if (empty($route)) {
+                return false;
+            }
+            if (!$this->hasPermission($route['permission_id'])) {
+                return false;
+            }
+            return true;
+        } else {
+            throw new \Exception("value type 非法", 1);
+
+        }
+    }
+
 }
