@@ -4,9 +4,9 @@ namespace Sixbyte\Perchecker;
 
 class Perchecker
 {
-    protected $role_model       = config('perchecker.role_model'));
-    protected $route_model      = config('perchecker.route_model'));
-    protected $permission_model = config('perchecker.permission_model'));
+    protected $role_model       = config('perchecker.role_model');
+    protected $route_model      = config('perchecker.route_model');
+    protected $permission_model = config('perchecker.permission_model');
 
     public function getRoleModel()
     {

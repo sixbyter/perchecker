@@ -9,7 +9,7 @@ trait HasPermissionTrait
 
     public function roles()
     {
-        return $this->belongsToMany('Sixbyte\Perchecker\Models\Role', 'user_role');
+        return $this->belongsToMany(config('perchecker.role_model'), 'user_role');
     }
 
     public function hasPermission($p, $type = 'id')

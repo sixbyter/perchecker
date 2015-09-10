@@ -13,7 +13,7 @@ class Role extends Model
 
     public function permissions()
     {
-        return $this->belongsToMany('Sixbyte\Perchecker\Models\Permission', 'role_permission');
+        return $this->belongsToMany(config('perchecker.permission_model'), 'role_permission');
     }
 
     public function users()

@@ -4,23 +4,26 @@ namespace Sixbyte\Perchecker;
 
 class Perchecker
 {
-    protected $role_model       = \Sixbyte\Perchecker\Models\Role::class;
-    protected $route_model      = \Sixbyte\Perchecker\Models\Route::class;
-    protected $permission_model = \Sixbyte\Perchecker\Models\Permission::class;
+    protected $role_model       = config('perchecker.role_model');
+    protected $route_model      = config('perchecker.route_model');
+    protected $permission_model = config('perchecker.permission_model');
 
     public function getRoleModel()
     {
-        return $this->$role_model;
+        $model = $this->$role_model;
+        return new $model;
     }
 
     public function getRouteModel()
     {
-        return $this->route_model;
+        $model = $this->route_model;
+        return new $model;
     }
 
     public function getPermissionModel()
     {
-        return $this->permission_model;
+        $model = $this->permission_model;
+        return new $model;
     }
 
 }

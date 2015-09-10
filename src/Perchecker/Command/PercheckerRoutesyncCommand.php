@@ -53,7 +53,7 @@ class PercheckerRoutesyncCommand extends Command
                     'uri'    => $route['uri'],
                     'status' => 'sync',
                 ];
-                $routeModel::where('name', $route['name'])->update($data);
+                $routeModel->where('name', $route['name'])->update($data);
                 $this->info($route['name'] . '  update');
             } else {
                 $data = [
@@ -61,7 +61,7 @@ class PercheckerRoutesyncCommand extends Command
                     'status' => 'sync',
                     'uri'    => $route['uri'],
                 ];
-                $routeModel::insert($data);
+                $routeModel->insert($data);
                 $this->comment($route['name'] . '  insert');
             }
         }
@@ -105,7 +105,7 @@ class PercheckerRoutesyncCommand extends Command
     protected function getDbRoutes()
     {
         $routeModel = Perchecker::getRouteModel();
-        return $routeModel::get();
+        return $routeModel->get();
     }
 
 }

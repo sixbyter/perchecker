@@ -14,12 +14,12 @@ class Permission extends Model
 
     public function roles()
     {
-        return $this->belongsToMany('Sixbyte\Perchecker\Models\Role', 'role_permission');
+        return $this->belongsToMany(config('perchecker.role_model'), 'role_permission');
     }
 
-    public function rotes()
+    public function routes()
     {
-        return $this->hasMany('Sixbyte\Perchecker\Models\Route');
+        return $this->hasMany(config('perchecker.route_model'));
     }
 
     public function scopeGroup($query)

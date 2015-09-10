@@ -15,7 +15,7 @@ class PercheckerMiddleware
         }
         $rolename   = $request->route()->getName();
         $routeModel = Perchecker::getRouteModel();
-        $route      = $routeModel::where('name', $rolename)->first();
+        $route      = $routeModel->where('name', $rolename)->first();
         if (empty($route)) {
             call_user_func(config('perchecker.forbidden_callback'));
         }

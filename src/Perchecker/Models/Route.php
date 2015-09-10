@@ -14,7 +14,7 @@ class Route extends Model
 
     public function permissions()
     {
-        return $this->belongsTo('Sixbyte\Perchecker\Models\Permission');
+        return $this->belongsTo(config('perchecker.permission_model'));
     }
 
 }
