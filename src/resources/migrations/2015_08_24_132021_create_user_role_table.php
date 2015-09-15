@@ -16,6 +16,16 @@ class CreateUserRoleTable extends Migration
             $table->increments('id');
             $table->integer('user_id');
             $table->integer('role_id');
+
+            $table->foreign('user_id')
+            ->references('id')->on('users')
+            ->onDelete('cascade')
+            ->onUpdate('cascade');
+
+            $table->foreign('role_id')
+            ->references('id')->on('roles')
+            ->onDelete('cascade')
+            ->onUpdate('cascade');
         });
     }
 

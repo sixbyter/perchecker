@@ -15,7 +15,13 @@ class CreatePermissionsTable extends Migration
         Schema::create('permissions', function (Blueprint $table) {
             $table->increments('id');
             $table->string('name', 20)->index();
+            $table->string('readable_name', 50)->nullable();
             $table->integer('pre_permission_id')->default(0);
+
+            $table->foreign('pre_permission_id')
+            ->references('id')->on('permissions')
+            ->onDelete('cascade')
+            ->onUpdate('cascade');
         });
     }
 

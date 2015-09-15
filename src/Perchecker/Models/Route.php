@@ -12,7 +12,7 @@ class Route extends Model
 
     public $timestamps = false;
 
-    public function permissions()
+    public function permission()
     {
         return $this->belongsTo(config('perchecker.permission_model'));
     }

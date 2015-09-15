@@ -8,7 +8,7 @@ class Permission extends Model
 {
     protected $table = 'permissions';
 
-    protected $fillable = ['name', 'pre_permission_id'];
+    protected $fillable = ['name', 'pre_permission_id', 'readable_name'];
 
     public $timestamps = false;
 
@@ -22,10 +22,14 @@ class Permission extends Model
         return $this->hasMany(config('perchecker.route_model'));
     }
 
-    public function scopeGroup($query)
+    public function prePermission()
     {
+        return $this->belongsTo(config('perchecker.permission_model'));
+    }
 
-        return $query->groupBy('pre_permission_id');
+    public function sons()
+    {
+        return $this->hasMany(config('perchecker.permission_model'), 'pre_permission_id', 'id');
     }
 
 }
