@@ -99,7 +99,8 @@ class PercheckerRoutesyncCommand extends Command
 
     protected function filterRoute(array $route)
     {
-        return $route;
+        $fileter_route_function = config('perchecker.filter_route');
+        return $fileter_route_function($route);
     }
 
     protected function getDbRoutes()

@@ -19,6 +19,12 @@ return [
         header('HTTP/1.0 403 You don\'t have permission to do it!');
         exit('You don\'t have permission to do it!');
     },
+    /**
+     * route filter function
+     */
+    'filter_route'       => function ($route) {
+        return $route;
+    },
 
     /*
      * Use template helpers
