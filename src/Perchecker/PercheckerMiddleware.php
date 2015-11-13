@@ -15,11 +15,16 @@ class PercheckerMiddleware
 
     public function handle($request, Closure $next)
     {
-        $rolename = $request->route()->getName();
-        if (!$request->user()->canRoute($rolename)) {
+        $role_key = $this->getRouteKey($request->route());
+        if (!$request->user()->canRoute($role_key)) {
             call_user_func(config('perchecker.forbidden_callback'));
         }
         return $next($request);
+    }
+
+    protected function getRouteKey($route)
+    {
+        return $route->domain() . ':' . implode('|', $route->methods()) . ':' . $route->uri();
     }
 
 }

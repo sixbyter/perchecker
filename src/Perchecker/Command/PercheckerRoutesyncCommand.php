@@ -32,49 +32,55 @@ class PercheckerRoutesyncCommand extends Command
         $routes    = $this->getRoutes();
         $db_routes = $this->getDbRoutes();
 
-        $routes_name = [];
+        $routes_key = [];
 
         foreach ($routes as $key => $route) {
-            if (empty($route['name'])) {
-                unset($routes[$key]);
-                continue;
-            }
-            $routes_name[$key] = $route['name'];
+            $routes_key[$key] = $this->getRouteKey($route);
         }
-
-        $db_routes_name = $db_routes->lists('name');
+        $_db_routes_key = $db_routes->lists('route_key');
+        // 兼容5.0和5.1 的collection
+        $db_routes_key = [];
+        foreach ($_db_routes_key as $_db_routes_key) {
+            $db_routes_key[] = $_db_routes_key;
+        }
 
         $routeModel = Perchecker::getRouteModel();
 
         // 同步 路由
         foreach ($routes as $route) {
-            if (in_array($route['name'], (array) $db_routes_name)) {
+            $route_key = $this->getRouteKey($route);
+            if (in_array($route_key, (array) $db_routes_key)) {
                 $data = [
-                    'uri'    => $route['uri'],
                     'status' => 'sync',
+                    'name'   => $route['name'],
                 ];
-                $routeModel->where('name', $route['name'])->update($data);
-                $this->info($route['name'] . '  update');
+                $routeModel->where('route_key', $route_key)->update($data);
+                $this->info($route_key . '  update');
             } else {
                 $data = [
-                    'name'   => $route['name'],
-                    'status' => 'sync',
-                    'uri'    => $route['uri'],
+                    'name'      => $route['name'],
+                    'status'    => 'sync',
+                    'route_key' => $route_key,
                 ];
                 $routeModel->insert($data);
-                $this->comment($route['name'] . '  insert');
+                $this->comment($route_key . '  insert');
             }
         }
 
         // 检查没有同步的路由
         foreach ($db_routes as $db_route) {
-            if (!in_array($db_route['name'], $routes_name)) {
+            if (!in_array($db_route['route_key'], $routes_key)) {
                 $db_route->status = 'missing';
                 $db_route->save();
-                $this->question($db_route['name'] . '  missing');
+                $this->question($db_route['route_key'] . '  missing');
             }
         }
 
+    }
+
+    protected function getRouteKey($route)
+    {
+        return $route['host'] . ':' . $route['method'] . ':' . $route['uri'];
     }
 
     protected function getRoutes()
@@ -83,7 +89,9 @@ class PercheckerRoutesyncCommand extends Command
         $results = [];
 
         foreach ($routes as $route) {
-            $results[] = $this->getRouteInformation($route);
+            if (null !== $r = $this->getRouteInformation($route)) {
+                $results[] = $r;
+            }
         }
 
         return $results;
@@ -92,8 +100,12 @@ class PercheckerRoutesyncCommand extends Command
     protected function getRouteInformation($route)
     {
         return $this->filterRoute([
-            'uri'  => $route->uri(),
-            'name' => $route->getName(),
+            'uri'        => $route->uri(),
+            'name'       => $route->getName(),
+            'action'     => $route->getActionName(),
+            'middleware' => $route->middleware(),
+            'host'       => $route->domain(),
+            'method'     => implode('|', $route->methods()),
         ]);
     }
 

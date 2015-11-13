@@ -12,6 +12,11 @@ trait HasPermissionTrait
         return $this->belongsToMany(config('perchecker.role_model'), 'user_role');
     }
 
+    public function permissions()
+    {
+        return $this->belongsToMany(config('perchecker.permission_model'), 'user_permission');
+    }
+
     /**
      * 这个用户是否有某个权限
      * @param  [string|int]  $p 权限name或者id
@@ -46,6 +51,13 @@ trait HasPermissionTrait
             }
         }
 
+        // 检查私有权限
+        $private_permissions = $this->permissions;
+        foreach ($private_permissions as $private_permission) {
+            $pre_permission                          = $all_permissions->where('id', $private_permission['pre_permission_id'])->first();
+            $permissions[$private_permission[$type]] = $pre_permission[$type];
+        }
+
         // 递归检查是否拥有父权限
         $checker = function ($need, $permissions) use (&$checker) {
             if (array_key_exists($need, $permissions)) {
@@ -60,6 +72,66 @@ trait HasPermissionTrait
         return $checker($p, $permissions);
     }
 
+    public function IsPrivatePermission($p)
+    {
+        $permission_table = Perchecker::getPermissionModel()->getTable();
+        if (is_string($p)) {
+            $type = $permission_table . '.name';
+        }
+        if (is_integer($p)) {
+            $type = $permission_table . '.id';
+        }
+        if (!isset($type)) {
+            throw new \Exception("invalid argument", 1);
+        }
+
+        $permission = $this->permissions()->where($type, $p)->first();
+
+        if (empty($permission)) {
+            return false;
+        }
+        return true;
+    }
+
+    public function permissionFrom($p)
+    {
+        $permission_table = Perchecker::getPermissionModel()->getTable();
+        if (is_string($p)) {
+            $type = $permission_table . '.name';
+        }
+        if (is_integer($p)) {
+            $type = $permission_table . '.id';
+        }
+        if (!isset($type)) {
+            throw new \Exception("invalid argument", 1);
+        }
+
+        $role_flag = false;
+        $roles     = $this->roles()->with('permissions')->get();
+        if (empty($roles)) {
+            $role_flag = false;
+        } else {
+            foreach ($roles as $role) {
+                if ($role->hasPermission($p)) {
+                    $role_flag = true;
+                    break;
+                }
+            }
+        }
+
+        if ($role_flag === true) {
+            return 'role';
+        } else {
+            $permission = $this->permissions()->where($type, $p)->first();
+
+            if (empty($permission)) {
+                return false;
+            }
+            return 'private';
+        }
+
+    }
+
     /**
      * 这个用户是否有某个角色
      * @param  [type]  $r 角色name或者id
@@ -67,12 +139,12 @@ trait HasPermissionTrait
      */
     public function hasRole($r)
     {
-
+        $role_table = Perchecker::getRoleModel()->getTable();
         if (is_string($r)) {
-            $type = 'name';
+            $type = $role_table . '.name';
         }
         if (is_integer($r)) {
-            $type = 'id';
+            $type = $role_table . '.id';
         }
         if (!isset($type)) {
             throw new \Exception("invalid argument", 1);
@@ -95,7 +167,7 @@ trait HasPermissionTrait
             return true;
         }
         $routeModel = Perchecker::getRouteModel();
-        $route      = $routeModel->where('name', $r)->first();
+        $route      = $routeModel->where('route_key', $r)->first();
         if (empty($route)) {
             return false;
         }

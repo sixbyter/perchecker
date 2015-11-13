@@ -32,4 +32,21 @@ class Permission extends Model
         return $this->hasMany(config('perchecker.permission_model'), 'pre_permission_id', 'id');
     }
 
+    public function getValidateRules()
+    {
+        if (empty($this->id)) {
+            return $rules = [
+                'name'              => 'required|unique:' . $this->table . ',name',
+                'readable_name'     => 'required',
+                'pre_permission_id' => 'required',
+            ];
+        } else {
+            return $rules = [
+                'name'              => 'required|unique:' . $this->table . ',name,' . $this->id,
+                'readable_name'     => 'required',
+                'pre_permission_id' => 'required',
+            ];
+        }
+    }
+
 }

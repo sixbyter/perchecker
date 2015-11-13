@@ -3,6 +3,7 @@
 namespace Sixbyte\Perchecker;
 
 use Closure;
+use Request;
 
 class Perchecker
 {
@@ -58,6 +59,23 @@ class Perchecker
         };
 
         return $ergodicer($permissions);
+    }
+
+    public function getAuthUser()
+    {
+        return Request::user();
+    }
+
+    public function hasPermission($p)
+    {
+        $user = $this->getAuthUser();
+        return $user->hasPermission($p);
+    }
+
+    public function hasRole($r)
+    {
+        $user = $this->getAuthUser();
+        return $user->hasRole($r);
     }
 
 }

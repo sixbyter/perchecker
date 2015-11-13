@@ -3,6 +3,7 @@
 namespace Sixbyte\Perchecker;
 
 use Illuminate\Support\ServiceProvider;
+use Illuminate\View\Compilers\BladeCompiler;
 use Sixbyte\Perchecker\Command\PercheckerRoutesyncCommand;
 
 class PercheckerServiceProvider extends ServiceProvider
@@ -37,9 +38,37 @@ class PercheckerServiceProvider extends ServiceProvider
         $this->app->singleton('command.perchecker.routesync', function ($app) {
             return new PercheckerRoutesyncCommand;
         });
+        $this->registerBladeExtensions();
 
         $this->commands('command.perchecker.routesync');
 
+    }
+
+    protected function registerBladeExtensions()
+    {
+        if (false === $this->app['config']->get('perchecker.template_helpers', true)) {
+            return;
+        }
+        $this->app->afterResolving('blade.compiler', function (BladeCompiler $bladeCompiler) {
+            /*
+             * add @shield and @endshield to blade compiler
+             */
+            $bladeCompiler->directive('shield', function ($expression) {
+                return "<?php if(app('Perchecker')->hasPermission{$expression}): ?>";
+            });
+            $bladeCompiler->directive('endshield', function ($expression) {
+                return '<?php endif; ?>';
+            });
+            /*
+             * add @is and @endis to blade compiler
+             */
+            $bladeCompiler->directive('is', function ($expression) {
+                return "<?php if(app('Perchecker')->hasRole{$expression}): ?>";
+            });
+            $bladeCompiler->directive('endis', function ($expression) {
+                return '<?php endif; ?>';
+            });
+        });
     }
 
     /**

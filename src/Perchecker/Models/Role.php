@@ -66,4 +66,20 @@ class Role extends Model
         return $checker($p, $permissions);
     }
 
+    public function getValidateRules()
+    {
+        if (empty($this->id)) {
+            return $rules = [
+                'name'          => 'required|unique:' . $this->table . ',name',
+                'readable_name' => 'required',
+            ];
+        } else {
+            return $rules = [
+                'name'          => 'required|unique:' . $this->table . ',name,' . $this->id,
+                'readable_name' => 'required',
+            ];
+        }
+
+    }
+
 }

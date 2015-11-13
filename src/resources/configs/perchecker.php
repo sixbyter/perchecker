@@ -23,13 +23,15 @@ return [
      * route filter function
      */
     'filter_route'       => function ($route) {
-        return $route;
+        if (in_array('perchecker', $route['middleware'])) {
+            return $route;
+        }
+        return null;
     },
-
     /*
      * Use template helpers
      */
-    // 'template_helpers'   => true,
+    'template_helpers'   => true,
 
     /*
      * Super User role name

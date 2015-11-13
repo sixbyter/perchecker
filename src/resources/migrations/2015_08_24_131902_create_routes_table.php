@@ -14,9 +14,9 @@ class CreateRoutesTable extends Migration
     {
         Schema::create('routes', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('name', 50)->index();
+            $table->string('name', 50)->nullable();
             $table->string('readable_name', 50)->nullable();
-            $table->string('uri', 100);
+            $table->string('route_key', 150)->index();
             $table->integer('permission_id')->unsigned()->nullable();
             $table->enum('status', array('sync', 'missing'))->default('sync');
         });
