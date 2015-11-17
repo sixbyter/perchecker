@@ -13,6 +13,8 @@ class Role extends Model
 
     public $timestamps = false;
 
+    protected $permissionsCache = null;
+
     public function permissions()
     {
         return $this->belongsToMany(config('perchecker.permission_model'), 'role_permission');
@@ -25,7 +27,7 @@ class Role extends Model
 
     /**
      * 这个角色是否拥有某个权限
-     * @param  [int|string]  $p     权限的name或者id
+     * @param  [int|string]  $p  [权限的name或者id]
      * @return boolean        [description]
      */
     public function hasPermission($p)
@@ -42,28 +44,55 @@ class Role extends Model
         if (!isset($type)) {
             throw new \Exception("invalid argument", 1);
         }
+        $permissions = $this->getPermissions();
 
-        $permissions     = [];
-        $all_permissions = Perchecker::getPermissionModel()->get(['id', 'name', 'pre_permission_id']);
-        if (!empty($this['permissions'])) {
-            foreach ($this['permissions'] as $role_permission) {
-                $pre_permission                       = $all_permissions->where('id', $role_permission['pre_permission_id'])->first();
-                $permissions[$role_permission[$type]] = $pre_permission[$type];
+        $permissions_type = array_column($permissions, 'can', $type);
+        return $permissions_type[$p];
+    }
+
+    protected function checkCan($permission_model, $role_permissions)
+    {
+        if ($role_permissions->where('id', $permission_model['id'])->first()) {
+            if ($permission_model['pre_permission_id'] === 0) {
+                return true;
+            } else {
+                return $this->checkCan($permission_model['prePermission'], $role_permissions);
             }
         }
+        return false;
+    }
 
-        // 递归检查是否拥有父权限
-        $checker = function ($need, $permissions) use (&$checker) {
-            if (array_key_exists($need, $permissions)) {
-                if ($permissions[$need] !== null) {
-                    return $checker($permissions[$need], $permissions);
+    /**
+     * 获取权限列表
+     * @param  [type] $type [description]
+     * @return [type]       [description]
+     */
+    public function getPermissions()
+    {
+        if (is_null($this->permissionsCache)) {
+            $permissions       = [];
+            $permissions_model = Perchecker::getPermissionModel()->with('prePermission')->get(['id', 'name', 'readable_name', 'pre_permission_id']);
+            $role_permissions  = $this['permissions'];
+            foreach ($permissions_model as $permission_model) {
+                $permission = [
+                    'id'                => $permission_model['id'],
+                    'name'              => $permission_model['name'],
+                    'readable_name'     => $permission_model['readable_name'],
+                    'pre_permission_id' => $permission_model['pre_permission_id'],
+                    'can'               => false,
+                ];
+                if ($this->name == config('perchecker.superuser_role')) {
+                    $permission['can'] = true;
                 } else {
-                    return true;
+                    $permission['can'] = $this->checkCan($permission_model, $role_permissions);
                 }
+
+                $permissions[] = $permission;
             }
-            return false;
-        };
-        return $checker($p, $permissions);
+            $this->permissionsCache = $permissions;
+        }
+
+        return $this->permissionsCache;
     }
 
     public function getValidateRules()

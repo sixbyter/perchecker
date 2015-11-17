@@ -21,11 +21,11 @@ class PercheckerServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register any application services.
+     * 注册Perchecker 提供者
      *
-     * This service provider is a great spot to register your various container
-     * bindings with the application. As you can see, we are registering our
-     * "Registrar" implementation here. You can add your own bindings too!
+     * 注册 Perchecker 映射
+     * 注册路由同步命令
+     * 注册Blade模板扩展
      *
      * @return void
      */
@@ -38,9 +38,9 @@ class PercheckerServiceProvider extends ServiceProvider
         $this->app->singleton('command.perchecker.routesync', function ($app) {
             return new PercheckerRoutesyncCommand;
         });
-        $this->registerBladeExtensions();
-
         $this->commands('command.perchecker.routesync');
+
+        $this->registerBladeExtensions();
 
     }
 
@@ -50,22 +50,18 @@ class PercheckerServiceProvider extends ServiceProvider
             return;
         }
         $this->app->afterResolving('blade.compiler', function (BladeCompiler $bladeCompiler) {
-            /*
-             * add @shield and @endshield to blade compiler
-             */
-            $bladeCompiler->directive('shield', function ($expression) {
+            // @percheckcan
+            $bladeCompiler->directive('percheckcan', function ($expression) {
                 return "<?php if(app('Perchecker')->hasPermission{$expression}): ?>";
             });
-            $bladeCompiler->directive('endshield', function ($expression) {
+            $bladeCompiler->directive('endpercheckcan', function ($expression) {
                 return '<?php endif; ?>';
             });
-            /*
-             * add @is and @endis to blade compiler
-             */
-            $bladeCompiler->directive('is', function ($expression) {
+            // @percheckis
+            $bladeCompiler->directive('percheckis', function ($expression) {
                 return "<?php if(app('Perchecker')->hasRole{$expression}): ?>";
             });
-            $bladeCompiler->directive('endis', function ($expression) {
+            $bladeCompiler->directive('endpercheckis', function ($expression) {
                 return '<?php endif; ?>';
             });
         });

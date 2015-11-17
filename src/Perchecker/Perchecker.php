@@ -66,12 +66,21 @@ class Perchecker
         return Request::user();
     }
 
+    /**
+     * 检查当前验证登录的用户是否有某个权限
+     * @param  [int|string]  $p [权限的id | 权限的name]
+     * @return boolean    [description]
+     */
     public function hasPermission($p)
     {
         $user = $this->getAuthUser();
         return $user->hasPermission($p);
     }
-
+    /**
+     * 检查当前验证登录的用户是否有某个角色
+     * @param  [int|string]  $r [角色的id | 角色的name]
+     * @return boolean    [description]
+     */
     public function hasRole($r)
     {
         $user = $this->getAuthUser();
