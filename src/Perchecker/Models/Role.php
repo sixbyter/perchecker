@@ -22,7 +22,7 @@ class Role extends Model
 
     public function users()
     {
-        return $this->belongsToMany('App\User', 'user_role');
+        return $this->belongsToMany(config('perchecker.user_model'), 'user_role');
     }
 
     /**

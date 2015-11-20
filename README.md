@@ -20,12 +20,12 @@ composer require "sixbyte/perchecker:0.2.*"
 
 在 `app/config/app.php` 的 `$providers` 和 `$aliases` 数组下分别添加
 providers
-```php=
+```php
 'Sixbyte\Perchecker\PercheckerServiceProvider',
 ```
 
 aliases
-```php=
+```php
 'Perchecker' => 'Sixbyte\Perchecker\PercheckerFacade',
 ```
 
@@ -44,11 +44,11 @@ php artisan perchecker:routesync
 ```
 
 Trait 在 app/User.php 添加
-```php=
+```php
 use Sixbyte\Perchecker\HasPermissionTrait;
 ```
 
-```php=
+```php
 use ... HasPermissionTrait
 ```
 配置完成
@@ -73,7 +73,7 @@ Route::get('/test', ['middleware' => ['auth', 'perchecker'], 'as' => 'test', fun
 
 
 #### 为用户 `1` 绑定新角色
-```php=
+```php
 # 创建新角色
 $role_model = Perchecker::getRoleModel();
 $role_id = $role_model->insert(['name'=>'admin','readable_name'=>'超级管理员']);
@@ -84,7 +84,7 @@ $user->roles()->attach($role_id);
 ```
 
 #### 为角色 `1` 绑定权限
-```php=
+```php
 # 创建权限
 $permission_model = Perchecker::getPermissionModel();
 $permission_id = $permission_model->insert(['name'=>'user.create']);
