@@ -99,6 +99,7 @@ trait HasPermissionTrait
      */
     protected function checkPermission($roles_permission, $roles_permissions)
     {
+        // 这里的递归避不开, 有大牛可以避开请一定要告诉
         if ($roles_permission['pre_permission_id'] === 0) {
             return $roles_permission['can'];
         } else {
@@ -111,29 +112,6 @@ trait HasPermissionTrait
             }
             return false;
         }
-    }
-
-    /**
-     * 查看权限的来源, 私人的, 角色的.
-     * @param  [string|int]  $p 权限name或者id
-     * @return [string]    [role|private]
-     */
-    public function permissionFrom($p)
-    {
-        if (is_string($p)) {
-            $type = 'name';
-        }
-        if (is_integer($p)) {
-            $type = 'id';
-        }
-        if (!isset($type)) {
-            throw new \Exception("invalid argument", 1);
-        }
-        $permissions      = $this->getPermissions();
-        $permissions_type = array_column($permissions, 'from', $type);
-
-        return $permissions_type[$p];
-
     }
 
     /**

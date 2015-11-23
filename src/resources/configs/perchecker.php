@@ -15,8 +15,8 @@ return [
     'user_model'         => \App\User::class,
 
     /*
-             * Forbidden callback
-    */
+     * Forbidden callback
+     */
     'forbidden_callback' => function () {
         header('HTTP/1.0 403 You don\'t have permission to do it!');
         exit('You don\'t have permission to do it!');
@@ -31,13 +31,18 @@ return [
         return null;
     },
     /*
-             * Use template helpers
-    */
+     * Use template helpers
+     */
     'template_helpers'   => true,
 
     /*
-             * Super User role name
-    */
+     * Super User role name
+     */
     'superuser_role'     => 'superuser',
+
+    /**
+     * The number of permissions in system
+     */
+    'permissions_count'  => 300,
 
 ];

@@ -50,18 +50,6 @@ class Role extends Model
         return $permissions_type[$p];
     }
 
-    protected function checkCan($permission_model, $role_permissions)
-    {
-        if ($role_permissions->where('id', $permission_model['id'])->first()) {
-            if ($permission_model['pre_permission_id'] === 0) {
-                return true;
-            } else {
-                return $this->checkCan($permission_model['prePermission'], $role_permissions);
-            }
-        }
-        return false;
-    }
-
     /**
      * 获取权限列表
      * @param  [type] $type [description]
@@ -71,8 +59,9 @@ class Role extends Model
     {
         if (is_null($this->permissionsCache)) {
             $permissions       = [];
-            $permissions_model = Perchecker::getPermissionModel()->with('prePermission')->get(['id', 'name', 'readable_name', 'pre_permission_id']);
+            $permissions_model = Perchecker::getAllPermissions();
             $role_permissions  = $this['permissions'];
+
             foreach ($permissions_model as $permission_model) {
                 $permission = [
                     'id'                => $permission_model['id'],
@@ -84,7 +73,22 @@ class Role extends Model
                 if ($this->name == config('perchecker.superuser_role')) {
                     $permission['can'] = true;
                 } else {
-                    $permission['can'] = $this->checkCan($permission_model, $role_permissions);
+                    // 设置深度为 10 避开递归
+                    $flag = false;
+                    for ($i = 0; $i < 10; $i++) {
+                        if ($role_permissions->where('id', $permission_model['id'])->first()) {
+                            if ($permission_model['pre_permission_id'] === 0) {
+                                $flag = true;
+                                break;
+                            } else {
+                                $permission_model = $permissions_model->where('id', $permission_model['pre_permission_id'])->first();
+                            }
+                        } else {
+                            $flag = false;
+                            break;
+                        }
+                    }
+                    $permission['can'] = $flag;
                 }
 
                 $permissions[] = $permission;

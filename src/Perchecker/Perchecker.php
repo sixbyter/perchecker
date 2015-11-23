@@ -2,7 +2,6 @@
 
 namespace Sixbyte\Perchecker;
 
-use Closure;
 use Request;
 
 class Perchecker
@@ -10,6 +9,7 @@ class Perchecker
     protected $role_model;
     protected $route_model;
     protected $permission_model;
+    protected $all_permissions_cache;
 
     public function getRoleModel()
     {
@@ -29,36 +29,14 @@ class Perchecker
         return new $model;
     }
 
-    /**
-     * 递归对权限的建立树结构
-     * @param  [type] $permissions [description]
-     * @return [type]              [description]
-     */
-    public function treePermissions(Closure $callback)
+    public function getAllPermissions()
     {
-
-        $permissions = $this->getPermissionModel()->where('pre_permission_id', 0)->get();
-        if (empty($permissions)) {
-            return [];
+        if (is_null($this->all_permissions_cache)) {
+            $this->all_permissions_cache = $this->getPermissionModel()
+                ->limit(config('perchecker.permissions_count', 300))
+                ->get();
         }
-
-        // 匿名函数遍历
-        $ergodicer = function ($permissions) use (&$ergodicer, $callback) {
-            $tree = [];
-            foreach ($permissions as $key => $permission) {
-                $tree[$key] = call_user_func($callback, $permission);
-                $sons       = $permission->sons;
-                if (!empty($sons)) {
-                    $nodes = $ergodicer($sons);
-                    if (!empty($nodes)) {
-                        $tree[$key]['nodes'] = $nodes;
-                    }
-                }
-            }
-            return $tree;
-        };
-
-        return $ergodicer($permissions);
+        return $this->all_permissions_cache;
     }
 
     public function getAuthUser()
