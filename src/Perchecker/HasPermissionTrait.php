@@ -11,9 +11,9 @@ trait HasPermissionTrait
      * 权限的缓存,保证一次请求只需要求一次用户的权限列表,减少查询数据库的次数.
      * @var null
      */
-    protected $permissionsCache = null;
+    protected $permissions_cache = null;
 
-    protected $rolesCache = null;
+    protected $roles_cache = null;
 
     public function roles()
     {
@@ -52,7 +52,7 @@ trait HasPermissionTrait
 
     public function getPermissions()
     {
-        if (is_null($this->permissionsCache)) {
+        if (is_null($this->permissions_cache)) {
             // 合并
             $roles = $this->roles()->get();
             if (empty($roles)) {
@@ -87,10 +87,10 @@ trait HasPermissionTrait
             foreach ($roles_permissions as $key => $roles_permission) {
                 $roles_permissions[$key]['can'] = $this->checkPermission($roles_permission, $roles_permissions);
             }
-            $this->permissionsCache = $roles_permissions;
+            $this->permissions_cache = $roles_permissions;
         }
 
-        return $this->permissionsCache;
+        return $this->permissions_cache;
     }
 
     /**
@@ -149,10 +149,10 @@ trait HasPermissionTrait
 
     public function getRoles()
     {
-        if ($this->rolesCache === null) {
-            $this->rolesCache = $this->roles()->get();
+        if ($this->roles_cache === null) {
+            $this->roles_cache = $this->roles()->get();
         }
-        return $this->rolesCache;
+        return $this->roles_cache;
     }
 
     /**
