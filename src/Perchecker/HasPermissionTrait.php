@@ -13,6 +13,8 @@ trait HasPermissionTrait
      */
     protected $permissionsCache = null;
 
+    protected $rolesCache = null;
+
     public function roles()
     {
         return $this->belongsToMany(config('perchecker.role_model'), 'user_role');
@@ -132,14 +134,25 @@ trait HasPermissionTrait
             throw new \Exception("invalid argument", 1);
         }
 
-        $role_table = Perchecker::getRoleModel()->getTable();
-        $type       = $role_table . '.' . $type;
+        $type       = $type;
 
-        $roles = $this->roles()->where($type, $r)->first();
+        $roles = $this->getRoles();
         if (empty($roles)) {
             return false;
         }
+        $role = $roles->where($type, $r)->first();
+        if (empty($role)) {
+            return false;
+        }
         return true;
+    }
+
+    public function getRoles()
+    {
+        if ($this->rolesCache === null) {
+            $this->rolesCache = $this->roles()->get();
+        }
+        return $this->rolesCache;
     }
 
     /**

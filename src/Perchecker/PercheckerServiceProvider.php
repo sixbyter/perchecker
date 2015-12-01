@@ -49,22 +49,38 @@ class PercheckerServiceProvider extends ServiceProvider
         if (false === $this->app['config']->get('perchecker.template_helpers', true)) {
             return;
         }
-        $this->app->afterResolving('blade.compiler', function (BladeCompiler $bladeCompiler) {
-            // @percheckcan
-            $bladeCompiler->directive('percheckcan', function ($expression) {
-                return "<?php if(app('Perchecker')->hasPermission{$expression}): ?>";
+        if (str_contains($this->app->version(), '5.0')) {
+            $this->app['blade.compiler']->extend(function ($view, $compiler) {
+                $open     = $compiler->createOpenMatcher('percheckcan');
+                $close    = $compiler->createPlainMatcher('endpercheckcan');
+                $template = ['$1<?php if(app(\'Perchecker\')->hasPermission$2): ?>', '$1<?php endif; ?>'];
+                return preg_replace([$open, $close], $template, $view);
             });
-            $bladeCompiler->directive('endpercheckcan', function ($expression) {
-                return '<?php endif; ?>';
+            $this->app['blade.compiler']->extend(function ($view, $compiler) {
+                $open     = $compiler->createOpenMatcher('percheckis');
+                $close    = $compiler->createPlainMatcher('endpercheckis');
+                $template = ['$1<?php if(app(\'Perchecker\')->hasRole$2): ?>', '$1<?php endif; ?>'];
+                return preg_replace([$open, $close], $template, $view);
             });
-            // @percheckis
-            $bladeCompiler->directive('percheckis', function ($expression) {
-                return "<?php if(app('Perchecker')->hasRole{$expression}): ?>";
+        } else {
+            $this->app->afterResolving('blade.compiler', function (BladeCompiler $bladeCompiler) {
+                // @percheckcan
+                $bladeCompiler->directive('percheckcan', function ($expression) {
+                    return "<?php if(app('Perchecker')->hasPermission{$expression}): ?>";
+                });
+                $bladeCompiler->directive('endpercheckcan', function ($expression) {
+                    return '<?php endif; ?>';
+                });
+                // @percheckis
+                $bladeCompiler->directive('percheckis', function ($expression) {
+                    return "<?php if(app('Perchecker')->hasRole{$expression}): ?>";
+                });
+                $bladeCompiler->directive('endpercheckis', function ($expression) {
+                    return '<?php endif; ?>';
+                });
             });
-            $bladeCompiler->directive('endpercheckis', function ($expression) {
-                return '<?php endif; ?>';
-            });
-        });
+        }
+
     }
 
     /**
