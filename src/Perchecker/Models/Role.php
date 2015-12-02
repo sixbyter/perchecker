@@ -47,7 +47,10 @@ class Role extends Model
         $permissions = $this->getPermissions();
 
         $permissions_type = array_column($permissions, 'can', $type);
-        return $permissions_type[$p];
+        if (isset($permissions_type[$p])) {
+            return $permissions_type[$p];
+        }
+        return false;
     }
 
     /**

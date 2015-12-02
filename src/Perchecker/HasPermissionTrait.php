@@ -47,39 +47,51 @@ trait HasPermissionTrait
 
         $permissions      = $this->getPermissions();
         $permissions_type = array_column($permissions, 'can', $type);
-        return $permissions_type[$p];
+        if (isset($permissions_type[$p])) {
+            return $permissions_type[$p];
+        }
+        return false;
     }
 
     public function getPermissions()
     {
         if (is_null($this->permissions_cache)) {
+            $roles_permissions = [];
             // 合并
             $roles = $this->roles()->get();
-            if (empty($roles)) {
-                $this->cachePermissions = [];
-                return [];
-            }
-            $roles_permissions = [];
-            foreach ($roles as $role) {
-                $role_permissions = $role->getPermissions();
-                foreach ($role_permissions as $key => $role_permission) {
-                    if (isset($roles_permissions[$key])) {
-                        if ($role_permission['can'] === true) {
+            // 有角色
+            if ($roles->count() > 0) {
+                foreach ($roles as $role) {
+                    $role_permissions = $role->getPermissions();
+                    foreach ($role_permissions as $key => $role_permission) {
+                        if (isset($roles_permissions[$key])) {
+                            if ($role_permission['can'] === true) {
+                                $roles_permissions[$key] = $role_permission;
+                            }
+                        } else {
                             $roles_permissions[$key] = $role_permission;
                         }
-                    } else {
-                        $roles_permissions[$key] = $role_permission;
+                        $roles_permissions[$key]['from'] = 'role';
                     }
-                    $roles_permissions[$key]['from'] = 'role';
                 }
-            }
-
-            $private_permissions = $this['permissions'];
-            foreach ($roles_permissions as $key => $roles_permission) {
-                $private_permission = $private_permissions->where('id', $roles_permission['id'])->first();
-                if ($private_permission) {
-                    $roles_permissions[$key]['can']  = true;
-                    $roles_permissions[$key]['from'] = 'private';
+                $private_permissions = $this['permissions'];
+                foreach ($roles_permissions as $key => $roles_permission) {
+                    $private_permission = $private_permissions->where('id', $roles_permission['id'])->first();
+                    if ($private_permission) {
+                        $roles_permissions[$key]['can']  = true;
+                        $roles_permissions[$key]['from'] = 'private';
+                    }
+                }
+            } else {
+                $private_permissions = $this['permissions'];
+                foreach ($private_permissions as $key => $private_permission) {
+                    $roles_permissions[] = [
+                        'id'                => $private_permission['id'],
+                        'name'              => $private_permission['name'],
+                        'readable_name'     => $private_permission['readable_name'],
+                        'pre_permission_id' => $private_permission['pre_permission_id'],
+                        'can'               => true,
+                    ];
                 }
             }
 
@@ -134,7 +146,7 @@ trait HasPermissionTrait
             throw new \Exception("invalid argument", 1);
         }
 
-        $type       = $type;
+        $type = $type;
 
         $roles = $this->getRoles();
         if (empty($roles)) {
@@ -169,6 +181,10 @@ trait HasPermissionTrait
         $route      = $routeModel->where('route_key', $r)->first();
         if (empty($route)) {
             return false;
+        }
+        // 路由没有设置权限, 默认为允许访问
+        if (empty($route['permission_id'])) {
+            return true;
         }
         if (!$this->hasPermission($route['permission_id'])) {
             return false;
