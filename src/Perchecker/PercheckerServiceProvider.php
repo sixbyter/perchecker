@@ -50,17 +50,19 @@ class PercheckerServiceProvider extends ServiceProvider
             return;
         }
         if (str_contains($this->app->version(), '5.0')) {
-            $this->app['blade.compiler']->extend(function ($view, $compiler) {
-                $open     = $compiler->createOpenMatcher('percheckcan');
-                $close    = $compiler->createPlainMatcher('endpercheckcan');
-                $template = ['$1<?php if(app(\'Perchecker\')->hasPermission$2): ?>', '$1<?php endif; ?>'];
-                return preg_replace([$open, $close], $template, $view);
-            });
-            $this->app['blade.compiler']->extend(function ($view, $compiler) {
-                $open     = $compiler->createOpenMatcher('percheckis');
-                $close    = $compiler->createPlainMatcher('endpercheckis');
-                $template = ['$1<?php if(app(\'Perchecker\')->hasRole$2): ?>', '$1<?php endif; ?>'];
-                return preg_replace([$open, $close], $template, $view);
+            $this->app->afterResolving('blade.compiler', function () {
+                $this->app['blade.compiler']->extend(function ($view, $compiler) {
+                    $open     = $compiler->createOpenMatcher('percheckcan');
+                    $close    = $compiler->createPlainMatcher('endpercheckcan');
+                    $template = ['$1<?php if(app(\'Perchecker\')->hasPermission$2)): ?>', '$1<?php endif; ?>'];
+                    return preg_replace([$open, $close], $template, $view);
+                });
+                $this->app['blade.compiler']->extend(function ($view, $compiler) {
+                    $open     = $compiler->createOpenMatcher('percheckis');
+                    $close    = $compiler->createPlainMatcher('endpercheckis');
+                    $template = ['$1<?php if(app(\'Perchecker\')->hasRole$2)): ?>', '$1<?php endif; ?>'];
+                    return preg_replace([$open, $close], $template, $view);
+                });
             });
         } else {
             $this->app->afterResolving('blade.compiler', function (BladeCompiler $bladeCompiler) {
