@@ -58,7 +58,7 @@ trait HasPermissionTrait
         if (is_null($this->permissions_cache)) {
             $roles_permissions = [];
             // 合并
-            $roles = $this->roles()->get();
+            $roles = $this->getRoles();
             // 有角色
             if ($roles->count() > 0) {
                 foreach ($roles as $role) {
