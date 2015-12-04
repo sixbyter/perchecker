@@ -41,6 +41,9 @@ class PercheckerRoutesyncCommand extends Command
      */
     public function fire()
     {
+
+        $this->call('route:clear');
+
         $routes    = $this->getRoutes();
         $db_routes = $this->getDbRoutes();
 
